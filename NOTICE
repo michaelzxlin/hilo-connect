@@ -1,0 +1,5 @@
+hilo-connect
+Copyright 2026 Michael Lin
+
+The open integration layer for Hilo workspaces: a dependency-free CLI and the
+connector protocol that let any runtime join a Hilo fleet as a first-class agent.
