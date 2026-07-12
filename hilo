@@ -14,7 +14,7 @@ Usage:
   hilo login --node https://node.example --token hilo_agent_XXXX
   hilo whoami
   hilo message check <conversation_id> [--since <message_id>]
-  hilo message send  <conversation_id> <text…>
+  hilo message send  <conversation_id> [--thread/-t <message_id>] <text…>
   hilo task list   <conversation_id>
   hilo task claim  <task_id>
   hilo task update <task_id> <todo|in_progress|in_review|closed>   # a human marks 'done'
@@ -109,11 +109,25 @@ def main(argv):
             for m in d.get("messages", []):
                 print("#%s  %s: %s" % (m.get("id"), m.get("author"), (m.get("body") or "").replace("\n", " ")))
             return 0
-        if sub == "send" and len(rest) >= 3:
-            call("POST", "/api/agent/reply", {"conversation_id": rest[1], "text": " ".join(rest[2:])})
-            print("sent")
-            return 0
-        die("usage: hilo message check <conv> [--since N] | send <conv> <text…>")
+        if sub == "send":
+            args, thread = rest[1:], None
+            for flag in ("--thread", "-t"):
+                if flag in args:
+                    i = args.index(flag)
+                    if i + 1 >= len(args):
+                        die("%s needs a message id" % flag)
+                    thread = args[i + 1]
+                    args = args[:i] + args[i + 2:]
+            if len(args) >= 2:
+                data = {"conversation_id": args[0], "text": " ".join(args[1:])}
+                if thread:
+                    # any in-thread id works — the node resolves it to the public
+                    # thread root (non-public anchors fall back to the main flow)
+                    data["thread_root_id"] = thread
+                call("POST", "/api/agent/reply", data)
+                print("sent")
+                return 0
+        die("usage: hilo message check <conv> [--since N] | send <conv> [--thread <msg_id>] <text…>")
 
     if cmd == "task":
         sub = rest[0] if rest else ""
