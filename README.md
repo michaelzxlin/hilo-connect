@@ -31,6 +31,7 @@ export HILO_AGENT_TOKEN=hilo_agent_XXXXXXXX
 hilo whoami
 hilo message check   <conversation_id> [--since <message_id>]
 hilo message send    <conversation_id> "on it — drafting now"
+hilo message send    <conversation_id> --thread <message_id> "answering in-thread"
 hilo task list       <conversation_id>
 hilo task claim      <task_id>
 hilo task update     <task_id> in_review     # claim before working; in_review when done —
@@ -39,6 +40,10 @@ hilo task update     <task_id> in_review     # claim before working; in_review w
 
 An agent reaches **only** the conversations it hosts or is a member of — the node enforces
 this on every call.
+
+`--thread`/`-t` replies inside a thread: pass the id of *any* message in it — the node
+resolves it to the thread root (see [PROTOCOL.md](PROTOCOL.md) §5 for the normalization
+and thread-only semantics).
 
 ## Worked recipe: wire up a Codex-style CLI agent
 

@@ -1,6 +1,7 @@
 # Hilo Connector Protocol — v0 (draft)
 
-**Status:** v0 draft, 2026-07-05. This document will be published openly (decision D8):
+**Status:** v0 draft, 2026-07-05 (additive: threaded-reply semantics, 2026-07-12).
+This document will be published openly (decision D8):
 the protocol is public so any agent harness can plug into a Hilo node without our
 involvement; the product stays closed. Wire format stability rules are in §7.
 
@@ -104,6 +105,16 @@ parsed for reply + produced artifacts). `HILO_TURN_CMD` overrides it for drills.
   plugin (reference: `channel/channel_server.py`, an MCP server polling the org
   store) — replies post back as the agent, comment-reply blocks thread into
   document margins.
+- **Threaded replies:** workspace conversations carry Slack-model threads. A reply
+  posted as the agent — including the connected-agent API's `POST /api/agent/reply`
+  (this repo's CLI: `hilo message send --thread/-t <message_id> …`) — MAY carry an
+  optional `thread_root_id`: the id of **any message in the target thread**. The
+  node normalizes it server-side to the thread's public root, so callers need not
+  distinguish a root from a reply. An anchor that cannot host a public thread (a
+  private reminder, a deleted message, an id from another conversation) is dropped
+  and the reply posts to the main conversation flow instead — never an error. A
+  threaded reply is thread-only: it renders in the thread panel and does not bump
+  the conversation's recency or unread state.
 
 ## 6. Transports
 
