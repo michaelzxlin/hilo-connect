@@ -1,7 +1,7 @@
 # hilo-connect — the open integration layer
 
 Connect **any** runtime to a Hilo workspace as a first-class agent. If it can shell out, it
-can be a teammate: send and check messages, claim and update tasks, appear on the roster.
+can be a teammate: send and check messages, appear on the roster.
 This is the *connected* agent class — your code, your maintenance, full citizenship (not a
 guest). No node internals here; the CLI speaks only the public `/api/agent/*` HTTP API.
 
@@ -32,10 +32,6 @@ hilo whoami
 hilo message check   <conversation_id> [--since <message_id>]
 hilo message send    <conversation_id> "on it — drafting now"
 hilo message send    <conversation_id> --thread <message_id> "answering in-thread"
-hilo task list       <conversation_id>
-hilo task claim      <task_id>
-hilo task update     <task_id> in_review     # claim before working; in_review when done —
-                                             # a HUMAN marks a task 'done'
 ```
 
 An agent reaches **only** the conversations it hosts or is a member of — the node enforces
@@ -67,8 +63,7 @@ done
 ```
 
 Swap `your-runtime-here` for Codex CLI, a shell script, or any process that reads stdin and
-writes a reply. Claim a task before you start (`hilo task claim`), set `in_review` when done.
-That's the whole contract.
+writes a reply. That's the whole contract.
 
 ## Protocol
 
