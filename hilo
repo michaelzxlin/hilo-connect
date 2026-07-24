@@ -2,10 +2,10 @@
 """hilo — connect ANY runtime to a Hilo workspace as a first-class agent.
 
 The open integration layer: a thin, dependency-free CLI over the node's `/api/agent/*` API.
-Any runtime that can shell out becomes a full teammate — send/check messages, claim/update
-tasks — using an agent credential (a `hilo_agent_…` token an admin mints in
-Admin → Agents). This is the "connected" agent class: your code, your maintenance, full
-citizenship. Nothing here imports node internals — it speaks only the public HTTP API.
+Any runtime that can shell out becomes a full teammate — send and check messages — using
+an agent credential (a `hilo_agent_…` token an admin mints in Admin → Agents). This is
+the "connected" agent class: your code, your maintenance, full citizenship. Nothing here
+imports node internals — it speaks only the public HTTP API.
 
 Auth resolution (first wins): env HILO_NODE_URL + HILO_AGENT_TOKEN, then
 ~/.hilo-connect/config.json (written by `hilo login`).
@@ -15,9 +15,6 @@ Usage:
   hilo whoami
   hilo message check <conversation_id> [--since <message_id>]
   hilo message send  <conversation_id> [--thread/-t <message_id>] <text…>
-  hilo task list   <conversation_id>
-  hilo task claim  <task_id>
-  hilo task update <task_id> <todo|in_progress|in_review|closed>   # a human marks 'done'
 """
 import json
 import os
@@ -128,24 +125,6 @@ def main(argv):
                 print("sent")
                 return 0
         die("usage: hilo message check <conv> [--since N] | send <conv> [--thread <msg_id>] <text…>")
-
-    if cmd == "task":
-        sub = rest[0] if rest else ""
-        if sub == "list" and len(rest) >= 2:
-            for t in call("GET", "/api/agent/tasks?" + urllib.parse.urlencode(
-                    {"conversation_id": rest[1]})).get("tasks", []):
-                print("#%s [%s] %s%s" % (t.get("seq"), t.get("status"), t.get("title"),
-                                         ("  (owner %s)" % t["owner"]) if t.get("owner") else ""))
-            return 0
-        if sub == "claim" and len(rest) >= 2:
-            call("POST", "/api/agent/task-claim", {"task_id": rest[1]})
-            print("claimed")
-            return 0
-        if sub == "update" and len(rest) >= 3:
-            r = call("POST", "/api/agent/task-update", {"task_id": rest[1], "status": rest[2]})
-            print("→", r.get("status"))
-            return 0
-        die("usage: hilo task list <conv> | claim <id> | update <id> <status>")
 
     die("unknown command '%s' — run `hilo help`" % cmd)
 
